@@ -47,6 +47,12 @@ public final class Settings {
         this.purgeUsercacheOrphans = purgeUsercacheOrphans;
     }
 
+    public static Settings defaults() {
+        return new Settings(90, 0, 7, List.of("x_"),
+                List.of("world", "world_nether", "world_the_end"), 5, 0,
+                true, true, true, true, 2, true, false);
+    }
+
     public static Settings load(ConfigurationSection config) {
         int offlineDays = Math.max(0, config.getInt("offline-days", 90));
         int interval = Math.max(0, config.getInt("check-interval-hours", 0));

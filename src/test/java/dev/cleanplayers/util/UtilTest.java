@@ -1,7 +1,10 @@
 package dev.cleanplayers.util;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.io.TempDir;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.LocalDateTime;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -10,6 +13,9 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class UtilTest {
+
+    @TempDir
+    Path tempDir;
 
     @Test
     void offlineDaysUsesWholeDaysAndClampsNegativeValues() {
@@ -73,5 +79,17 @@ class UtilTest {
         assertFalse(FileUtil.isSafeWorldName("/etc"));
         assertFalse(FileUtil.isSafeWorldName(".."));
         assertFalse(FileUtil.isSafeWorldName(""));
+    }
+
+    @Test
+    void copyVerifiedKeepsByteIdenticalContentAndDetectsTampering() throws Exception {
+        Path source = tempDir.resolve("source.dat");
+        Files.writeString(source, "playerdata-payload");
+        Path target = tempDir.resolve("target.dat");
+        assertEquals(18L, FileUtil.copyVerified(source, target));
+        assertEquals(FileUtil.sha256(source), FileUtil.sha256(target));
+
+        Files.writeString(target, "corrupted!!");
+        assertFalse(FileUtil.sha256(source).equals(FileUtil.sha256(target)));
     }
 }

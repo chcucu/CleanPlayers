@@ -54,6 +54,8 @@ public final class CleanPlayersPlugin extends JavaPlugin {
     private RestoreService restoreService;
     private volatile ScanResult lastScan;
     private volatile boolean protectionHealthy = true;
+    private volatile boolean storageHealthy = true;
+    private volatile boolean configHealthy = true;
 
     private final List<BukkitTask> tasks = new CopyOnWriteArrayList<>();
     private BukkitTask scheduledCleanupTask;
@@ -68,14 +70,15 @@ public final class CleanPlayersPlugin extends JavaPlugin {
             FileUtil.ensureDirectory(paths.data());
             FileUtil.ensureDirectory(paths.logs());
         } catch (IOException ex) {
-            getLogger().log(Level.SEVERE, "Could not create plugin directories", ex);
-            disableSelf();
-            return;
+            storageHealthy = false;
+            getLogger().log(Level.SEVERE, "Could not create plugin directories. Commands stay "
+                    + "available but cleanups and restores are disabled until this is fixed", ex);
         }
 
         if (!loadSettings()) {
-            disableSelf();
-            return;
+            configHealthy = false;
+            settings = Settings.defaults();
+            getLogger().severe("Fix config.yml and run /cp reload. Until then cleanups are disabled.");
         }
 
         protectionStore = new ProtectionStore(paths.protectFile());
@@ -106,9 +109,12 @@ public final class CleanPlayersPlugin extends JavaPlugin {
         restoreService = new RestoreService(this, operationLock);
 
         CleanPlayersCommand command = new CleanPlayersCommand(this);
-        if (getCommand("cleanplayers") != null) {
-            getCommand("cleanplayers").setExecutor(command);
-            getCommand("cleanplayers").setTabCompleter(command);
+        var pluginCommand = getCommand("cleanplayers");
+        if (pluginCommand != null) {
+            pluginCommand.setExecutor(command);
+            pluginCommand.setTabCompleter(command);
+            getLogger().info("Command registered: /" + pluginCommand.getName()
+                    + " (aliases: " + pluginCommand.getAliases() + ")");
         } else {
             getLogger().severe("Command 'cleanplayers' is missing from plugin.yml");
         }
@@ -155,10 +161,6 @@ public final class CleanPlayersPlugin extends JavaPlugin {
             getLogger().log(Level.SEVERE, "Invalid config.yml: " + ex.getMessage(), ex);
             return false;
         }
-    }
-
-    private void disableSelf() {
-        getServer().getPluginManager().disablePlugin(this);
     }
 
     private void scheduleBackgroundTasks() {
@@ -258,6 +260,7 @@ public final class CleanPlayersPlugin extends JavaPlugin {
         }
 
         settings = loaded;
+        configHealthy = true;
         activityGate.setGuardMillis(loaded.activeGuardMillis());
         rescheduleCleanup();
         sender.sendMessage(PREFIX + "Configuration reloaded. offline-days=" + loaded.offlineDays()
@@ -510,5 +513,13 @@ public final class CleanPlayersPlugin extends JavaPlugin {
 
     public boolean protectionHealthy() {
         return protectionHealthy;
+    }
+
+    public boolean storageHealthy() {
+        return storageHealthy;
+    }
+
+    public boolean configHealthy() {
+        return configHealthy;
     }
 }

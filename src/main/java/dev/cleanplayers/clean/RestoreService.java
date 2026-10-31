@@ -74,6 +74,9 @@ public final class RestoreService {
         if (input == null || input.isBlank()) {
             return failure(input, "Usage: /cp restore <player name or uuid>");
         }
+        if (!plugin.storageHealthy()) {
+            return failure(input, "Plugin storage is not writable; refusing to restore.");
+        }
 
         UUID uuid = resolveUuid(input.trim());
         if (uuid == null) {

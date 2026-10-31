@@ -3,6 +3,7 @@ package dev.cleanplayers.data;
 import dev.cleanplayers.util.FileUtil;
 import dev.cleanplayers.util.IpUtil;
 import dev.cleanplayers.util.UuidUtil;
+import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 
 import java.io.IOException;
@@ -41,6 +42,10 @@ public final class ProtectionStore {
         this.file = file;
     }
 
+    /**
+     * Loads the protection list strictly: malformed YAML, non-list fields or unparsable entries
+     * raise an IOException instead of silently producing an empty (and therefore unsafe) list.
+     */
     public synchronized void load() throws IOException {
         names.clear();
         uuids.clear();
@@ -49,20 +54,46 @@ public final class ProtectionStore {
         if (!Files.exists(file)) {
             return;
         }
-        YamlConfiguration yaml = YamlConfiguration.loadConfiguration(file.toFile());
-        for (String raw : yaml.getStringList("players")) {
-            if (raw != null && !raw.isBlank()) {
-                names.add(raw.trim().toLowerCase(Locale.ROOT));
+        YamlConfiguration yaml = new YamlConfiguration();
+        try {
+            yaml.load(file.toFile());
+        } catch (IOException | InvalidConfigurationException ex) {
+            throw new IOException("Cannot parse data/protect.yml: " + ex.getMessage(), ex);
+        }
+        for (String key : List.of("players", "uuids", "ips")) {
+            if (yaml.contains(key) && !yaml.isList(key)) {
+                throw new IOException("data/protect.yml field '" + key + "' must be a list");
             }
+        }
+        for (String raw : yaml.getStringList("players")) {
+            if (raw == null || raw.isBlank()) {
+                continue;
+            }
+            String value = raw.trim();
+            try {
+                validateName(value);
+            } catch (IllegalArgumentException ex) {
+                throw new IOException("Invalid player name in data/protect.yml: " + value, ex);
+            }
+            names.add(value.toLowerCase(Locale.ROOT));
         }
         for (String raw : yaml.getStringList("uuids")) {
-            UuidUtil.parse(raw).ifPresent(uuids::add);
+            if (raw == null || raw.isBlank()) {
+                continue;
+            }
+            UUID parsed = UuidUtil.parse(raw)
+                    .orElseThrow(() -> new IOException("Invalid UUID in data/protect.yml: " + raw));
+            uuids.add(parsed);
         }
         for (String raw : yaml.getStringList("ips")) {
-            String normalized = IpUtil.normalize(raw);
-            if (normalized != null) {
-                ips.add(normalized);
+            if (raw == null || raw.isBlank()) {
+                continue;
             }
+            String normalized = IpUtil.normalize(raw);
+            if (normalized == null) {
+                throw new IOException("Invalid IP address in data/protect.yml: " + raw);
+            }
+            ips.add(normalized);
         }
     }
 

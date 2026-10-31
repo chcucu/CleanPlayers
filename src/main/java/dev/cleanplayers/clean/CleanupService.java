@@ -89,6 +89,15 @@ public final class CleanupService {
                     "The protection list could not be loaded; refusing to run for safety. "
                             + "Fix data/protect.yml and use /cp reload.");
         }
+        if (!plugin.configHealthy()) {
+            return RunReport.failure(dryRun,
+                    "config.yml is invalid; refusing to run for safety. Fix it and use /cp reload.");
+        }
+        if (!plugin.storageHealthy()) {
+            return RunReport.failure(dryRun,
+                    "Plugin storage is not writable; refusing to run for safety. "
+                            + "Check the plugins/CleanPlayers folder permissions.");
+        }
 
         VanillaProtection vanilla;
         try {

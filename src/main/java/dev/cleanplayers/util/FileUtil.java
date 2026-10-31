@@ -1,6 +1,7 @@
 package dev.cleanplayers.util;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UncheckedIOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.AtomicMoveNotSupportedException;
@@ -10,6 +11,9 @@ import java.nio.file.Path;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.HexFormat;
 import java.util.stream.Stream;
 
 public final class FileUtil {
@@ -40,8 +44,8 @@ public final class FileUtil {
     }
 
     /**
-     * Copies a file and verifies the copy has the exact same byte size. Throws when the copy
-     * cannot be verified, which is the signal callers use to skip a deletion.
+     * Copies a file and verifies both the byte size and the SHA-256 digest of the copy.
+     * Throws when the copy cannot be verified, which is the signal callers use to skip a deletion.
      */
     public static long copyVerified(Path source, Path target) throws IOException {
         long size = Files.size(source);
@@ -52,7 +56,28 @@ public final class FileUtil {
             throw new IOException("Backup verification failed for " + source.getFileName()
                     + " (source " + size + " bytes, copy " + copied + " bytes)");
         }
+        if (!sha256(source).equals(sha256(target))) {
+            throw new IOException("Backup verification failed for " + source.getFileName()
+                    + " (SHA-256 mismatch)");
+        }
         return copied;
+    }
+
+    public static String sha256(Path file) throws IOException {
+        MessageDigest digest;
+        try {
+            digest = MessageDigest.getInstance("SHA-256");
+        } catch (NoSuchAlgorithmException ex) {
+            throw new IOException("SHA-256 is not available", ex);
+        }
+        try (InputStream in = Files.newInputStream(file)) {
+            byte[] buffer = new byte[8192];
+            int read;
+            while ((read = in.read(buffer)) != -1) {
+                digest.update(buffer, 0, read);
+            }
+        }
+        return HexFormat.of().formatHex(digest.digest());
     }
 
     public static void deleteIfExists(Path path) throws IOException {

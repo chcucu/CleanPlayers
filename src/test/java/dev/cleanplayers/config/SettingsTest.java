@@ -55,4 +55,16 @@ class SettingsTest {
         assertEquals(0, settings.backupKeepDays());
         assertEquals(0, settings.activeGuardMinutes());
     }
+
+    @Test
+    void defaultsAreSafeAndUsableWhenConfigIsBroken() {
+        Settings settings = Settings.defaults();
+        assertEquals(90, settings.offlineDays());
+        assertEquals(0, settings.checkIntervalHours());
+        assertEquals(List.of("world", "world_nether", "world_the_end"), settings.worlds());
+        assertTrue(settings.deleteRelatedData());
+        assertTrue(settings.protectWhitelist());
+        assertTrue(settings.protectOps());
+        assertTrue(settings.protectBanned());
+    }
 }

@@ -3,12 +3,15 @@ package dev.cleanplayers.data;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ProtectionStoreTest {
@@ -58,5 +61,24 @@ class ProtectionStoreTest {
         assertTrue(store.remove("1.2.3.4"));
         assertFalse(store.remove("Steve"));
         assertEquals(0, store.snapshot().names().size());
+    }
+
+    @Test
+    void rejectsMalformedProtectFileInsteadOfLoadingAnEmptyList() throws Exception {
+        Path file = tempDir.resolve("protect.yml");
+        Files.writeString(file, "players: [unclosed\n");
+        assertThrows(IOException.class, () -> new ProtectionStore(file).load());
+
+        Path wrongType = tempDir.resolve("wrong-type.yml");
+        Files.writeString(wrongType, "uuids: not-a-list\n");
+        assertThrows(IOException.class, () -> new ProtectionStore(wrongType).load());
+
+        Path badUuid = tempDir.resolve("bad-uuid.yml");
+        Files.writeString(badUuid, "uuids:\n  - 1234\n");
+        assertThrows(IOException.class, () -> new ProtectionStore(badUuid).load());
+
+        Path badIp = tempDir.resolve("bad-ip.yml");
+        Files.writeString(badIp, "ips:\n  - definitely-not-an-ip\n");
+        assertThrows(IOException.class, () -> new ProtectionStore(badIp).load());
     }
 }
