@@ -1,0 +1,49 @@
+name: CleanPlayers
+version: '${project.version}'
+main: dev.cleanplayers.CleanPlayersPlugin
+api-version: '1.21'
+authors: [CleanPlayers]
+description: Automatically purge player data of players who have been offline for too long.
+website: https://github.com/cleanplayers/CleanPlayers
+folia-supported: false
+
+commands:
+  cleanplayers:
+    aliases: [cp]
+    description: Manage offline player data cleanup.
+    usage: /cp help
+    permission: cleanplayers.use
+
+permissions:
+  cleanplayers.use:
+    description: Run dry runs, real cleanups and view backups.
+    default: op
+  cleanplayers.protect:
+    description: Manage the CleanPlayers protection list.
+    default: op
+  cleanplayers.restore:
+    description: Restore player data from backups.
+    default: op
+  cleanplayers.reload:
+    description: Reload the CleanPlayers configuration.
+    default: op
+  cleanplayers.backup.purge:
+    description: Purge expired backups manually.
+    default: op
+  cleanplayers.notify:
+    description: Receive cleanup completion notifications.
+    default: op
+  cleanplayers.bypass:
+    description: Players with this permission are never cleaned.
+    default: false
+  cleanplayers.admin:
+    description: Grants every CleanPlayers permission.
+    default: op
+    children:
+      cleanplayers.use: true
+      cleanplayers.protect: true
+      cleanplayers.restore: true
+      cleanplayers.reload: true
+      cleanplayers.backup.purge: true
+      cleanplayers.notify: true
+      cleanplayers.bypass: true

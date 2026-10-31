@@ -1,0 +1,65 @@
+# CleanPlayers configuration
+# Reload with: /cp reload
+
+# Players whose lastPlayed timestamp is older than this number of days are cleaned up.
+# 0 means "any offline player". Online players are always skipped.
+offline-days: 90
+
+# Automatically run a cleanup every N hours. 0 disables the scheduler (manual /cp run only).
+# The cleanup always runs asynchronously and never blocks the server thread.
+check-interval-hours: 0
+
+# Backups older than this number of days are deleted on startup and every 24 hours.
+# 0 keeps backups forever.
+backup-keep-days: 7
+
+# Player names starting with any of these prefixes are always cleaned up, regardless of
+# how recently they logged in. Useful for alt-account ("刷号") farms. Case-insensitive.
+name-prefixes:
+  - x_
+
+# Worlds whose playerdata / advancements / stats folders are scanned.
+worlds:
+  - world
+  - world_nether
+  - world_the_end
+
+# ---------------------------------------------------------------------------
+# Safety
+# ---------------------------------------------------------------------------
+
+# Never clean players who joined or left within this many minutes.
+# This protects freshly saved player data from being deleted by a concurrent run.
+active-guard-minutes: 5
+
+# Hard cap on how many players a single run may delete. 0 = unlimited.
+max-players-per-run: 0
+
+# Also delete advancements and stats files for a cleaned player (not just playerdata).
+# These files are backed up as well.
+delete-related-data: true
+
+# Vanilla lists that always protect a player, even if they are not in the plugin list.
+protect-vanilla-whitelist: true
+protect-vanilla-ops: true
+protect-vanilla-banned: true
+
+# Parallel I/O threads used for backing up and deleting files (1-8).
+io-threads: 2
+
+# ---------------------------------------------------------------------------
+# Notifications
+# ---------------------------------------------------------------------------
+
+# Notify online players with cleanplayers.notify (default: OP) after each run.
+notify-admins: true
+
+# ---------------------------------------------------------------------------
+# Cache records
+# ---------------------------------------------------------------------------
+
+# Remove usercache.json entries that have never produced playerdata (placeholders).
+# The original usercache.json is backed up into the run folder before rewriting.
+# Note: the running server keeps usercache.json in memory and may rewrite it later,
+# so entries can reappear after a server restart.
+purge-usercache-orphans: false
