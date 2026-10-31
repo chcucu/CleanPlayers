@@ -4,7 +4,6 @@ main: dev.cleanplayers.CleanPlayersPlugin
 api-version: '1.21'
 authors: [CleanPlayers]
 description: Automatically purge player data of players who have been offline for too long.
-website: https://github.com/cleanplayers/CleanPlayers
 folia-supported: false
 
 commands:
