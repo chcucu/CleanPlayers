@@ -72,7 +72,7 @@ public final class RestoreService {
     private RestoreReport execute(String input, String actor) {
         long started = System.currentTimeMillis();
         if (input == null || input.isBlank()) {
-            return failure(input, "Usage: /cp restore <player name or uuid>");
+            return failure(input, "Usage: /cleanplayers restore <player name or uuid>");
         }
         if (!plugin.storageHealthy()) {
             return failure(input, "Plugin storage is not writable; refusing to restore.");

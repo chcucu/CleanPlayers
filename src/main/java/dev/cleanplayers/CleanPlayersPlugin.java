@@ -78,7 +78,7 @@ public final class CleanPlayersPlugin extends JavaPlugin {
         if (!loadSettings()) {
             configHealthy = false;
             settings = Settings.defaults();
-            getLogger().severe("Fix config.yml and run /cp reload. Until then cleanups are disabled.");
+            getLogger().severe("Fix config.yml and run /cleanplayers reload. Until then cleanups are disabled.");
         }
 
         protectionStore = new ProtectionStore(paths.protectFile());
@@ -88,7 +88,7 @@ public final class CleanPlayersPlugin extends JavaPlugin {
         } catch (IOException ex) {
             protectionHealthy = false;
             getLogger().log(Level.SEVERE, "Could not load data/protect.yml. Cleanups are disabled "
-                    + "until the file is fixed and /cp reload succeeds.", ex);
+                    + "until the file is fixed and /cleanplayers reload succeeds.", ex);
         }
 
         ipStore = new PlayerIpStore(paths.ipFile());
@@ -113,8 +113,7 @@ public final class CleanPlayersPlugin extends JavaPlugin {
         if (pluginCommand != null) {
             pluginCommand.setExecutor(command);
             pluginCommand.setTabCompleter(command);
-            getLogger().info("Command registered: /" + pluginCommand.getName()
-                    + " (aliases: " + pluginCommand.getAliases() + ")");
+            getLogger().info("Command registered: /" + pluginCommand.getName());
         } else {
             getLogger().severe("Command 'cleanplayers' is missing from plugin.yml");
         }
@@ -127,7 +126,8 @@ public final class CleanPlayersPlugin extends JavaPlugin {
                 + "offline-days=" + settings.offlineDays()
                 + ", worlds=" + settings.worlds()
                 + ", auto-cleanup=" + (settings.checkIntervalHours() == 0
-                        ? "off" : settings.checkIntervalHours() + "h"));
+                        ? "off" : settings.checkIntervalHours() + "h")
+                + ", startup-cleanup=" + (settings.cleanupOnStartup() ? "on" : "off"));
     }
 
     @Override
@@ -184,6 +184,10 @@ public final class CleanPlayersPlugin extends JavaPlugin {
         getServer().getScheduler().runTaskLaterAsynchronously(this,
                 () -> purgeExpiredBackups("startup"), 20L);
         getServer().getScheduler().runTaskAsynchronously(this, this::warmUpIndex);
+        if (settings.cleanupOnStartup()) {
+            getServer().getScheduler().runTaskLaterAsynchronously(this,
+                    () -> cleanupService.runAsync(false, getServer().getConsoleSender()), 40L);
+        }
     }
 
     private void warmUpIndex() {
@@ -369,7 +373,7 @@ public final class CleanPlayersPlugin extends JavaPlugin {
         if (report.candidates == 0) {
             lines.add("  No players matched the cleanup rules.");
         } else {
-            lines.add("  Nothing was deleted. Use /cp run to execute this cleanup.");
+            lines.add("  Nothing was deleted. Use /cleanplayers run to execute this cleanup.");
         }
         return lines;
     }

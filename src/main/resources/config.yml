@@ -1,13 +1,18 @@
 # CleanPlayers configuration
-# Reload with: /cp reload
+# Reload with: /cleanplayers reload
 
 # Players whose lastPlayed timestamp is older than this number of days are cleaned up.
 # 0 means "any offline player". Online players are always skipped.
 offline-days: 90
 
-# Automatically run a cleanup every N hours. 0 disables the scheduler (manual /cp run only).
+# Automatically run a cleanup every N hours. 0 disables the scheduler (manual /cleanplayers run only).
 # The cleanup always runs asynchronously and never blocks the server thread.
 check-interval-hours: 0
+
+# Run a real cleanup shortly after the server has started.
+# Uses the same safety checks (requirements) as /cleanplayers run:
+# skipped when config, protection list or storage is unhealthy.
+cleanup-on-startup: false
 
 # Backups older than this number of days are deleted on startup and every 24 hours.
 # 0 keeps backups forever.

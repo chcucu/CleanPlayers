@@ -87,11 +87,11 @@ public final class CleanupService {
         if (!plugin.protectionHealthy()) {
             return RunReport.failure(dryRun,
                     "The protection list could not be loaded; refusing to run for safety. "
-                            + "Fix data/protect.yml and use /cp reload.");
+                            + "Fix data/protect.yml and use /cleanplayers reload.");
         }
         if (!plugin.configHealthy()) {
             return RunReport.failure(dryRun,
-                    "config.yml is invalid; refusing to run for safety. Fix it and use /cp reload.");
+                    "config.yml is invalid; refusing to run for safety. Fix it and use /cleanplayers reload.");
         }
         if (!plugin.storageHealthy()) {
             return RunReport.failure(dryRun,

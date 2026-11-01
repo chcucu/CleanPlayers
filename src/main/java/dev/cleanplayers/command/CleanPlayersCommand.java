@@ -52,7 +52,7 @@ public final class CleanPlayersCommand implements CommandExecutor, TabCompleter 
                     return true;
                 }
                 if (args.length < 2) {
-                    sender.sendMessage(PREFIX + "Usage: /cp restore <player name or uuid>");
+                    sender.sendMessage(PREFIX + "Usage: /cleanplayers restore <player name or uuid>");
                     return true;
                 }
                 plugin.restoreService().restoreAsync(args[1], sender);
@@ -65,7 +65,7 @@ public final class CleanPlayersCommand implements CommandExecutor, TabCompleter 
                 }
                 plugin.reload(sender);
             }
-            default -> sender.sendMessage(PREFIX + "Unknown subcommand. Use /cp help.");
+            default -> sender.sendMessage(PREFIX + "Unknown subcommand. Use /cleanplayers help.");
         }
         return true;
     }
@@ -75,13 +75,13 @@ public final class CleanPlayersCommand implements CommandExecutor, TabCompleter 
             return;
         }
         if (args.length < 2) {
-            sender.sendMessage(PREFIX + "Usage: /cp protect <add|remove|list> [player|uuid|ip]");
+            sender.sendMessage(PREFIX + "Usage: /cleanplayers protect <add|remove|list> [player|uuid|ip]");
             return;
         }
         switch (args[1].toLowerCase(Locale.ROOT)) {
             case "add" -> {
                 if (args.length < 3) {
-                    sender.sendMessage(PREFIX + "Usage: /cp protect add <player name|uuid|ip>");
+                    sender.sendMessage(PREFIX + "Usage: /cleanplayers protect add <player name|uuid|ip>");
                     return;
                 }
                 try {
@@ -99,7 +99,7 @@ public final class CleanPlayersCommand implements CommandExecutor, TabCompleter 
             }
             case "remove" -> {
                 if (args.length < 3) {
-                    sender.sendMessage(PREFIX + "Usage: /cp protect remove <player name|uuid|ip>");
+                    sender.sendMessage(PREFIX + "Usage: /cleanplayers protect remove <player name|uuid|ip>");
                     return;
                 }
                 boolean removed;
@@ -117,7 +117,7 @@ public final class CleanPlayersCommand implements CommandExecutor, TabCompleter 
                 }
             }
             case "list" -> listProtection(sender);
-            default -> sender.sendMessage(PREFIX + "Usage: /cp protect <add|remove|list> [player|uuid|ip]");
+            default -> sender.sendMessage(PREFIX + "Usage: /cleanplayers protect <add|remove|list> [player|uuid|ip]");
         }
     }
 
@@ -136,7 +136,7 @@ public final class CleanPlayersCommand implements CommandExecutor, TabCompleter 
             return;
         }
         if (args.length < 2) {
-            sender.sendMessage(PREFIX + "Usage: /cp backup <list|purge>");
+            sender.sendMessage(PREFIX + "Usage: /cleanplayers backup <list|purge>");
             return;
         }
         switch (args[1].toLowerCase(Locale.ROOT)) {
@@ -178,18 +178,18 @@ public final class CleanPlayersCommand implements CommandExecutor, TabCompleter 
                     sendLater(sender, lines);
                 });
             }
-            default -> sender.sendMessage(PREFIX + "Usage: /cp backup <list|purge>");
+            default -> sender.sendMessage(PREFIX + "Usage: /cleanplayers backup <list|purge>");
         }
     }
 
     private void sendHelp(CommandSender sender) {
         sender.sendMessage(PREFIX + "Offline player data cleaner.");
-        sender.sendMessage("/cp dryrun - simulate a cleanup and list affected players/files");
-        sender.sendMessage("/cp run - execute a real cleanup (backup first)");
-        sender.sendMessage("/cp restore <name|uuid> - restore the latest backup of a player");
-        sender.sendMessage("/cp protect add|remove|list <name|uuid|ip> - manage the protection list");
-        sender.sendMessage("/cp backup list|purge - list or purge backups");
-        sender.sendMessage("/cp reload - reload config.yml and the protection list");
+        sender.sendMessage("/cleanplayers dryrun - simulate a cleanup and list affected players/files");
+        sender.sendMessage("/cleanplayers run - execute a real cleanup (backup first)");
+        sender.sendMessage("/cleanplayers restore <name|uuid> - restore the latest backup of a player");
+        sender.sendMessage("/cleanplayers protect add|remove|list <name|uuid|ip> - manage the protection list");
+        sender.sendMessage("/cleanplayers backup list|purge - list or purge backups");
+        sender.sendMessage("/cleanplayers reload - reload config.yml and the protection list");
         sender.sendMessage("Permissions: cleanplayers.use, .protect, .restore, .bypass, .admin");
     }
 

@@ -25,12 +25,13 @@ public final class Settings {
     private final int ioThreads;
     private final boolean notifyAdmins;
     private final boolean purgeUsercacheOrphans;
+    private final boolean cleanupOnStartup;
 
     private Settings(int offlineDays, int checkIntervalHours, int backupKeepDays,
                      List<String> namePrefixes, List<String> worlds, int activeGuardMinutes,
                      int maxPlayersPerRun, boolean deleteRelatedData, boolean protectWhitelist,
                      boolean protectOps, boolean protectBanned, int ioThreads, boolean notifyAdmins,
-                     boolean purgeUsercacheOrphans) {
+                     boolean purgeUsercacheOrphans, boolean cleanupOnStartup) {
         this.offlineDays = offlineDays;
         this.checkIntervalHours = checkIntervalHours;
         this.backupKeepDays = backupKeepDays;
@@ -45,12 +46,13 @@ public final class Settings {
         this.ioThreads = ioThreads;
         this.notifyAdmins = notifyAdmins;
         this.purgeUsercacheOrphans = purgeUsercacheOrphans;
+        this.cleanupOnStartup = cleanupOnStartup;
     }
 
     public static Settings defaults() {
         return new Settings(90, 0, 7, List.of("x_"),
                 List.of("world", "world_nether", "world_the_end"), 5, 0,
-                true, true, true, true, 2, true, false);
+                true, true, true, true, 2, true, false, false);
     }
 
     public static Settings load(ConfigurationSection config) {
@@ -105,7 +107,8 @@ public final class Settings {
                 config.getBoolean("protect-vanilla-banned", true),
                 ioThreads,
                 config.getBoolean("notify-admins", true),
-                config.getBoolean("purge-usercache-orphans", false));
+                config.getBoolean("purge-usercache-orphans", false),
+                config.getBoolean("cleanup-on-startup", false));
     }
 
     public int offlineDays() {
@@ -162,6 +165,10 @@ public final class Settings {
 
     public boolean purgeUsercacheOrphans() {
         return purgeUsercacheOrphans;
+    }
+
+    public boolean cleanupOnStartup() {
+        return cleanupOnStartup;
     }
 
     public long activeGuardMillis() {

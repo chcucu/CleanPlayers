@@ -8,9 +8,8 @@ folia-supported: false
 
 commands:
   cleanplayers:
-    aliases: [cp]
     description: Manage offline player data cleanup.
-    usage: /cp help
+    usage: /cleanplayers help
 
 permissions:
   cleanplayers.use:

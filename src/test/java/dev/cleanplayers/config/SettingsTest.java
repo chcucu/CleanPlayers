@@ -31,6 +31,7 @@ class SettingsTest {
         assertEquals(8, settings.ioThreads());
         assertTrue(settings.deleteRelatedData());
         assertFalse(settings.purgeUsercacheOrphans());
+        assertFalse(settings.cleanupOnStartup());
     }
 
     @Test
@@ -66,5 +67,14 @@ class SettingsTest {
         assertTrue(settings.protectWhitelist());
         assertTrue(settings.protectOps());
         assertTrue(settings.protectBanned());
+        assertFalse(settings.cleanupOnStartup());
+    }
+
+    @Test
+    void readsStartupCleanupFlag() {
+        MemoryConfiguration config = new MemoryConfiguration();
+        config.set("worlds", List.of("world"));
+        config.set("cleanup-on-startup", true);
+        assertTrue(Settings.load(config).cleanupOnStartup());
     }
 }

@@ -11,7 +11,7 @@ import java.util.logging.Logger;
  * <p>Bukkit cannot evaluate permissions of offline players, so LuckPerms is queried through
  * reflection when it is installed. Only users already present in LuckPerms' cache are available;
  * this is intentional to avoid blocking network/database calls for every scanned player. The
- * reliable way to protect a player who is not currently cached is {@code /cp protect add}.</p>
+ * reliable way to protect a player who is not currently cached is {@code /cleanplayers protect add}.</p>
  */
 public final class BypassChecker {
 
@@ -59,7 +59,7 @@ public final class BypassChecker {
                 warned = true;
                 logger.log(Level.WARNING,
                         "Could not evaluate cleanplayers.bypass through LuckPerms; only cached users "
-                                + "can be checked. Use /cp protect add for guaranteed protection.", ex);
+                                + "can be checked. Use /cleanplayers protect add for guaranteed protection.", ex);
             }
             return false;
         }

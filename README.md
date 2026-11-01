@@ -12,44 +12,44 @@
 - **刷号前缀清理**：`name-prefixes` 中的前缀（如 `x_`）匹配 `usercache.json` 名字，无论最后登录时间多久都清理。
 - **占位缓存清理**：可选清理 `usercache.json` 中从未生成 `playerdata` 的占位 UUID（先备份 usercache）。
 - **保护名单**：原版白名单 / OP / 封禁玩家默认保护；另支持按玩家名、UUID、IP 保护；拥有 `cleanplayers.bypass` 的玩家自我豁免。
-- **备份与恢复**：删除前复制到 `plugins/CleanPlayers/backups/日期/时间/`，校验字节数与 SHA-256 一致后才删除；`/cp restore` 从最近备份恢复 playerdata、advancements、stats。
-- **定时清理**：`check-interval-hours` 异步周期执行。
+- **备份与恢复**：删除前复制到 `plugins/CleanPlayers/backups/日期/时间/`，校验字节数与 SHA-256 一致后才删除；`/cleanplayers restore` 从最近备份恢复 playerdata、advancements、stats。
+- **定时清理**：`check-interval-hours` 异步周期执行；`cleanup-on-startup: true` 时开服后自动执行一次。
 - **审计日志**：所有清理 / 恢复操作写入 `plugins/CleanPlayers/logs/audit-YYYY-MM-DD.log`，完成后控制台输出并通知在线管理员。
-- **安全拒绝**：`config.yml` 无法解析、`data/protect.yml` 损坏或含有非法条目、插件目录不可写时，插件仍会加载并响应指令，但会拒绝一切清理/恢复操作，修复后 `/cp reload` 即可恢复。
+- **安全拒绝**：`config.yml` 无法解析、`data/protect.yml` 损坏或含有非法条目、插件目录不可写时，插件仍会加载并响应指令，但会拒绝一切清理/恢复操作，修复后 `/cleanplayers reload` 即可恢复。
 - **备份校验**：每个备份文件复制后校验字节数与 SHA-256，任一不一致则该玩家整体跳过删除。
 
 ## 安装
 
-1. 从 Releases 下载 `CleanPlayers-1.0.1.jar`。
+1. 从 Releases 下载 `CleanPlayers-1.0.2.jar`。
 2. 放入服务器 `plugins/` 目录。
 3. 启动服务器，按需编辑 `plugins/CleanPlayers/config.yml`。
-4. `/cp reload` 重载配置。
+4. `/cleanplayers reload` 重载配置。
 
 ## 指令
 
 | 指令 | 说明 | 权限 |
 | --- | --- | --- |
-| `/cp dryrun` | 模拟清理，仅列出将删除的玩家与文件 | `cleanplayers.use` |
-| `/cp run` | 立即执行真实清理（先备份） | `cleanplayers.use` |
-| `/cp restore <玩家名/UUID>` | 从最近备份恢复该玩家数据 | `cleanplayers.restore` |
-| `/cp protect add <玩家名/UUID/IP>` | 加入保护名单 | `cleanplayers.protect` |
-| `/cp protect remove <玩家名/UUID/IP>` | 移出保护名单 | `cleanplayers.protect` |
-| `/cp protect list` | 查看保护名单 | `cleanplayers.protect` |
-| `/cp backup list` | 查看最近 20 次备份 | `cleanplayers.use` |
-| `/cp backup purge` | 手动清理过期备份 | `cleanplayers.backup.purge` |
-| `/cp reload` | 重载配置与保护名单 | `cleanplayers.reload` |
+| `/cleanplayers dryrun` | 模拟清理，仅列出将删除的玩家与文件 | `cleanplayers.use` |
+| `/cleanplayers run` | 立即执行真实清理（先备份） | `cleanplayers.use` |
+| `/cleanplayers restore <玩家名/UUID>` | 从最近备份恢复该玩家数据 | `cleanplayers.restore` |
+| `/cleanplayers protect add <玩家名/UUID/IP>` | 加入保护名单 | `cleanplayers.protect` |
+| `/cleanplayers protect remove <玩家名/UUID/IP>` | 移出保护名单 | `cleanplayers.protect` |
+| `/cleanplayers protect list` | 查看保护名单 | `cleanplayers.protect` |
+| `/cleanplayers backup list` | 查看最近 20 次备份 | `cleanplayers.use` |
+| `/cleanplayers backup purge` | 手动清理过期备份 | `cleanplayers.backup.purge` |
+| `/cleanplayers reload` | 重载配置与保护名单 | `cleanplayers.reload` |
 
-别名：`/cleanplayers`、`/cp`。
+仅注册完整指令 `/cleanplayers`，不使用短别名，避免与其它插件的 `/cp` 冲突。
 
 > 命令本身不预置权限节点，因此即使玩家没有权限也能收到明确提示；拥有 `cleanplayers.admin` 或对应子权限即可使用。
 
 ## 排查「指令无法执行」
 
 1. 控制台执行 `plugins`，确认 `CleanPlayers` 显示为绿色（未加载时请看 `logs/latest.log` 中的报错）。
-2. 启动日志应包含 `Command registered: /cleanplayers (aliases: [cp])` 与 `Enabled in ...`。
+2. 启动日志应包含 `Command registered: /cleanplayers` 与 `Enabled in ...`。
 3. 游戏内执行需要权限：OP 默认拥有；使用权限插件时请授予 `cleanplayers.admin`（包含全部子权限）。
-4. 若 `/cp` 与其它插件的别名冲突，请改用 `/cleanplayers`（或 `/cleanplayers:cp`）。
-5. 若 `config.yml` 或 `data/protect.yml` 损坏，插件仍会加载并响应指令，但清理会被安全拒绝，修复后执行 `/cp reload`。
+4. 若仍提示指令冲突，可使用 Bukkit 的插件限定形式 `/cleanplayers:cleanplayers`。
+5. 若 `config.yml` 或 `data/protect.yml` 损坏，插件仍会加载并响应指令，但清理会被安全拒绝，修复后执行 `/cleanplayers reload`。
 6. `data/protect.yml` 采用严格解析：只要 YAML 语法错误、字段不是列表，或存在非法 UUID/IP/玩家名，就会整体拒绝加载并禁止清理，避免保护名单被当作空列表而误删。
 
 
@@ -73,6 +73,7 @@
 ```yaml
 offline-days: 90            # 离线超过该天数的玩家会被清理；0 表示所有离线玩家
 check-interval-hours: 0     # 自动清理间隔小时，0 表示关闭，仅手动执行
+cleanup-on-startup: false   # 开服后自动执行一次真实清理（同样先备份、走全部安全校验）
 backup-keep-days: 7         # 备份保留天数，0 表示永久保留
 
 name-prefixes:              # 刷号前缀，匹配 usercache 名字，忽略大小写
@@ -132,8 +133,8 @@ plugins/CleanPlayers/backups/
 ```
 
 - 每个文件复制后都会校验字节数与 SHA-256，任一备份失败（或大小/摘要不一致）则该玩家整体跳过，不执行删除。
-- `/cp backup purge` 与启动时、每日定时任务会删除超过 `backup-keep-days` 的备份目录；没有 `manifest.json` 的目录不会被自动删除。
-- `/cp restore <玩家名/UUID>`：
+- `/cleanplayers backup purge` 与启动时、每日定时任务会删除超过 `backup-keep-days` 的备份目录；没有 `manifest.json` 的目录不会被自动删除。
+- `/cleanplayers restore <玩家名/UUID>`：
   1. 解析 UUID（支持玩家名、在线玩家、IP 映射表、备份 manifest 中的历史名字）。
   2. 玩家在线或处于活动保护窗口 → 拒绝。
   3. 找到最近一个包含该玩家数据的备份。
@@ -162,7 +163,7 @@ plugins/CleanPlayers/backups/
 mvn clean package
 ```
 
-产物：`target/CleanPlayers-1.0.1.jar`。要求 JDK 21+，Maven 首次构建需能访问 PaperMC 仓库与 JitPack。
+产物：`target/CleanPlayers-1.0.2.jar`。要求 JDK 21+，Maven 首次构建需能访问 PaperMC 仓库与 JitPack。
 
 ## 许可
 
