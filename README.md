@@ -20,7 +20,7 @@
 
 ## 安装
 
-1. 从 Releases 下载 `CleanPlayers-1.0.2.jar`。
+1. 从 Releases 下载 `CleanPlayers-1.0.3.jar`。
 2. 放入服务器 `plugins/` 目录。
 3. 启动服务器，按需编辑 `plugins/CleanPlayers/config.yml`。
 4. `/cleanplayers reload` 重载配置。
@@ -51,6 +51,17 @@
 4. 若仍提示指令冲突，可使用 Bukkit 的插件限定形式 `/cleanplayers:cleanplayers`。
 5. 若 `config.yml` 或 `data/protect.yml` 损坏，插件仍会加载并响应指令，但清理会被安全拒绝，修复后执行 `/cleanplayers reload`。
 6. `data/protect.yml` 采用严格解析：只要 YAML 语法错误、字段不是列表，或存在非法 UUID/IP/玩家名，就会整体拒绝加载并禁止清理，避免保护名单被当作空列表而误删。
+
+## 排查「x_ 前缀机器人没被清理」
+
+先执行 `/cleanplayers dryrun`，看输出中的 `Protected/skipped:` 与 `Names resolved:`：
+
+- `Names resolved: 0 / 1000`：`usercache.json` 已没有这些名字。前缀清理依赖 `usercache.json` 与 `data/player-ips.json`，让机器人重新登录一次即可重新记录名字；无法重新登录时，可在保护真实玩家后临时把 `offline-days` 设为 `0` 清理所有离线账号。
+- `online=1000`：机器人仍在线，或退出未超过 `active-guard-minutes`，离线保护窗口过后再清理。
+- `vanilla_protected=1000`：命中白名单 / OP / 封禁保护，按需关闭对应的 `protect-vanilla-*`。
+- `cache_only_ignored=1000`：只有 usercache 记录、没有 playerdata，需要 `purge-usercache-orphans: true`。
+- `too_recent=1000` 且 `Prefix matches: 0`：名字未解析到，按第一条处理。
+- `scanned 0 player(s)`：`worlds` 未包含实际世界目录，补全后 `/cleanplayers reload`。
 
 
 ## 权限
@@ -163,7 +174,7 @@ plugins/CleanPlayers/backups/
 mvn clean package
 ```
 
-产物：`target/CleanPlayers-1.0.2.jar`。要求 JDK 21+，Maven 首次构建需能访问 PaperMC 仓库与 JitPack。
+产物：`target/CleanPlayers-1.0.3.jar`。要求 JDK 21+，Maven 首次构建需能访问 PaperMC 仓库与 JitPack。
 
 ## 许可
 

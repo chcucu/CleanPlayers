@@ -15,6 +15,7 @@ import dev.cleanplayers.data.VanillaProtection;
 import dev.cleanplayers.gate.PlayerActivityGate;
 import dev.cleanplayers.listener.PlayerActivityListener;
 import dev.cleanplayers.model.Candidate;
+import dev.cleanplayers.model.CandidateReason;
 import dev.cleanplayers.model.ScanResult;
 import dev.cleanplayers.perms.BypassChecker;
 import dev.cleanplayers.scan.PlayerScanner;
@@ -127,7 +128,8 @@ public final class CleanPlayersPlugin extends JavaPlugin {
                 + ", worlds=" + settings.worlds()
                 + ", auto-cleanup=" + (settings.checkIntervalHours() == 0
                         ? "off" : settings.checkIntervalHours() + "h")
-                + ", startup-cleanup=" + (settings.cleanupOnStartup() ? "on" : "off"));
+                + ", startup-cleanup=" + (settings.cleanupOnStartup() ? "on" : "off")
+                + ", name-prefixes=" + settings.namePrefixes());
     }
 
     @Override
@@ -340,6 +342,7 @@ public final class CleanPlayersPlugin extends JavaPlugin {
                 + report.candidates + " candidate(s), " + FileUtil.formatBytes(report.bytes) + ".");
         appendWarnings(lines, report);
         appendSkipped(lines, report);
+        appendNameDiagnostics(lines, report);
 
         int cap = 40;
         int shown = 0;
@@ -430,6 +433,26 @@ public final class CleanPlayersPlugin extends JavaPlugin {
             builder.append(entry.getKey()).append('=').append(entry.getValue());
         }
         lines.add(builder.toString());
+    }
+
+    private void appendNameDiagnostics(List<String> lines, RunReport report) {
+        if (report.scan == null || report.scan.entries().isEmpty()) {
+            return;
+        }
+        long total = report.scan.entries().size();
+        long resolved = report.scan.entries().values().stream()
+                .filter(entry -> entry.name() != null)
+                .count();
+        if (resolved < total) {
+            lines.add("  Names resolved: " + resolved + " / " + total
+                    + " (unresolved players can only match by offline-days).");
+        }
+        if (!settings.namePrefixes().isEmpty()) {
+            int matched = (int) report.preview.stream()
+                    .filter(candidate -> candidate.reason() == CandidateReason.NAME_PREFIX)
+                    .count();
+            lines.add("  Prefix matches for " + settings.namePrefixes() + ": " + matched + ".");
+        }
     }
 
     private void notifyAdmins(String message, CommandSender sender) {
