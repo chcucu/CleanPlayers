@@ -63,7 +63,9 @@ notify-admins: true
 # Cache records
 # ---------------------------------------------------------------------------
 
-# Remove usercache.json entries that have never produced playerdata (placeholders).
+# Remove usercache.json entries that have never produced playerdata (empty shells).
+# Every such entry is removed unless it is online, whitelisted/op/banned, in the
+# protection list or has cleanplayers.bypass. Name prefixes are NOT required here.
 # The original usercache.json is backed up into the run folder before rewriting.
 # Note: the running server keeps usercache.json in memory and may rewrite it later,
 # so entries can reappear after a server restart.

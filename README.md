@@ -20,7 +20,7 @@
 
 ## 安装
 
-1. 从 Releases 下载 `CleanPlayers-1.0.3.jar`。
+1. 从 Releases 下载 `CleanPlayers-1.0.4.jar`。
 2. 放入服务器 `plugins/` 目录。
 3. 启动服务器，按需编辑 `plugins/CleanPlayers/config.yml`。
 4. `/cleanplayers reload` 重载配置。
@@ -59,7 +59,8 @@
 - `Names resolved: 0 / 1000`：`usercache.json` 已没有这些名字。前缀清理依赖 `usercache.json` 与 `data/player-ips.json`，让机器人重新登录一次即可重新记录名字；无法重新登录时，可在保护真实玩家后临时把 `offline-days` 设为 `0` 清理所有离线账号。
 - `online=1000`：机器人仍在线，或退出未超过 `active-guard-minutes`，离线保护窗口过后再清理。
 - `vanilla_protected=1000`：命中白名单 / OP / 封禁保护，按需关闭对应的 `protect-vanilla-*`。
-- `cache_only_ignored=1000`：只有 usercache 记录、没有 playerdata，需要 `purge-usercache-orphans: true`。
+- `cache_only_ignored=1000`：旧版本的跳过原因，现已移除；`purge-usercache-orphans: true` 时会清理全部无 playerdata 的空壳记录。
+- `usercache-only shell account(s) found but not cleaned`：存在只有 usercache 记录、没有任何 playerdata 的空壳号，设 `purge-usercache-orphans: true` 后清理（不需要匹配前缀）。
 - `too_recent=1000` 且 `Prefix matches: 0`：名字未解析到，按第一条处理。
 - `scanned 0 player(s)`：`worlds` 未包含实际世界目录，补全后 `/cleanplayers reload`。
 
@@ -122,7 +123,7 @@ purge-usercache-orphans: false
 5. 名字匹配 `name-prefixes` → 清理。
 6. `lastPlayed` 有效且离线天数超过 `offline-days` → 清理。
 7. 无有效时间戳的 playerdata → 不清理。
-8. 仅存在于 usercache、无 playerdata 的占位 UUID → 仅在 `purge-usercache-orphans: true` 时清理缓存记录。
+8. 仅存在于 usercache、无 playerdata 的空壳号 → 在 `purge-usercache-orphans: true` 时清理缓存记录（不限前缀，仍受在线 / 白名单 / OP / 封禁 / 保护名单 / bypass 保护）。
 
 清理开始前与删除前都会重新检查在线状态，玩家在扫描期间上线会立即取消对其的清理。
 
@@ -174,7 +175,7 @@ plugins/CleanPlayers/backups/
 mvn clean package
 ```
 
-产物：`target/CleanPlayers-1.0.3.jar`。要求 JDK 21+，Maven 首次构建需能访问 PaperMC 仓库与 JitPack。
+产物：`target/CleanPlayers-1.0.4.jar`。要求 JDK 21+，Maven 首次构建需能访问 PaperMC 仓库与 JitPack。
 
 ## 许可
 

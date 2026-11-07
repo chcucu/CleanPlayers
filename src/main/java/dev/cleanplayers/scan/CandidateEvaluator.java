@@ -77,14 +77,10 @@ public final class CandidateEvaluator {
             }
         }
 
-        int cacheConsidered = 0;
+        List<UserCacheEntry> shells = scan.cacheOnlyEntries();
+        int cacheConsidered = shells.size();
         if (settings.purgeUsercacheOrphans()) {
-            for (UserCacheEntry cacheEntry : scan.cacheOnlyEntries()) {
-                PlayerEntry existing = scan.entry(cacheEntry.uuid());
-                if (existing != null && existing.hasPlayerData()) {
-                    continue;
-                }
-                cacheConsidered++;
+            for (UserCacheEntry cacheEntry : shells) {
                 String name = cacheEntry.name();
                 UUID uuid = cacheEntry.uuid();
                 PlayerEntry synthetic = new PlayerEntry(uuid);
@@ -106,11 +102,9 @@ public final class CandidateEvaluator {
                     skipped.merge("bypass", 1, Integer::sum);
                     continue;
                 }
-                if (matchesPrefix(name, settings.namePrefixes())) {
-                    candidates.add(new Candidate(synthetic, CandidateReason.CACHE_ONLY, 0L));
-                } else {
-                    skipped.merge("cache_only_ignored", 1, Integer::sum);
-                }
+                // A cache entry without any playerdata is an empty shell: there is no data to
+                // protect and no timestamp to compare, so the orphan purge flag alone decides.
+                candidates.add(new Candidate(synthetic, CandidateReason.CACHE_ONLY, 0L));
             }
         }
 

@@ -121,6 +121,11 @@ public final class CleanupService {
                 System.currentTimeMillis());
         report.candidates = evaluation.candidates().size();
         report.skippedRules.putAll(evaluation.skipped());
+        if (!settings.purgeUsercacheOrphans() && evaluation.cacheEntriesConsidered() > 0) {
+            report.warnings.add(evaluation.cacheEntriesConsidered()
+                    + " usercache-only shell account(s) found but not cleaned; "
+                    + "set purge-usercache-orphans: true to remove them.");
+        }
         for (String warning : scan.warnings()) {
             report.warnings.add(warning);
         }
